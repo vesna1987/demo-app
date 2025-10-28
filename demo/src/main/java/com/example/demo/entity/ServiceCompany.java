@@ -1,9 +1,18 @@
 package com.example.demo.entity;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 public class ServiceCompany {
@@ -15,8 +24,11 @@ public class ServiceCompany {
 	private String address;
 	private String fullAddress;
 	private boolean isActive;
-	private boolean free;
-	private boolean premium;
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "service_providers", joinColumns = @JoinColumn(name = "company_id"))
+	@Column(name = "provider")
+	private Set<ServiceProvider> providers = new HashSet<>();
 
 	public String getCin() {
 		return cin;
@@ -66,20 +78,16 @@ public class ServiceCompany {
 		this.isActive = isActive;
 	}
 
-	public boolean isFree() {
-		return free;
+	public Set<ServiceProvider> getProviders() {
+		return providers;
 	}
 
-	public void setFree(boolean free) {
-		this.free = free;
+	public void setProviders(Set<ServiceProvider> providers) {
+		this.providers = providers;
 	}
 
-	public boolean isPremium() {
-		return premium;
-	}
-
-	public void setPremium(boolean premium) {
-		this.premium = premium;
+	public void addProvider(ServiceProvider provider) {
+		providers.add(provider);
 	}
 
 }

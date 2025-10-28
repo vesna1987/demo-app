@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.listener;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,10 +11,11 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.example.demo.entity.FreeServiceCompany;
-import com.example.demo.entity.PremiumServiceCompany;
 import com.example.demo.entity.ServiceCompany;
-import com.example.demo.entity.ServiceCompanyRepository;
+import com.example.demo.entity.dto.FreeServiceCompany;
+import com.example.demo.entity.dto.PremiumServiceCompany;
+import com.example.demo.repository.ServiceCompanyRepository;
+import com.example.demo.updater.ServiceCompanyAssembler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,15 +25,13 @@ public class DemoApplicationReadyListener implements ApplicationListener<Applica
 	@Autowired
 	private ObjectMapper objectMapper;
 	@Autowired
-	private ServiceCompanyUpdater serviceCompanyUpdater;
+	private ServiceCompanyAssembler serviceCompanyUpdater;
 	@Autowired
 	private ServiceCompanyRepository serviceCompanyRepository;
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		try {
-			System.out.println(
-					"Executing logic after the application is fully ready and serving requests (ApplicationReadyEvent)");
 
 			InputStream inputStreamForFC = getClass().getResourceAsStream("/free_service_companies-1.json");
 			List<FreeServiceCompany> freeCompanies = objectMapper.readValue(inputStreamForFC,
@@ -62,7 +61,6 @@ public class DemoApplicationReadyListener implements ApplicationListener<Applica
 			}).toList());
 
 			serviceCompanyRepository.saveAll(serviceCompanies);
-			System.out.println("Data loaded from JSON file.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

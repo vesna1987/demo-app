@@ -1,21 +1,21 @@
-package com.example.demo.entity;
+package com.example.demo.entity.dto;
 
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.demo.entity.ServiceProvider;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Lob;
 
-@Entity
-public class VerificationEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+public class VerificationEntityDto {
+
+	@JsonIgnore
 	private Long id;
 
 	private String verificationId;
 	private String queryText;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = JsonFormat.DEFAULT_TIMEZONE)
 	private Date timestamp;
 	@Lob
 	private String result;

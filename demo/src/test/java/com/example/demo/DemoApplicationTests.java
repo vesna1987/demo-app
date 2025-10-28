@@ -12,8 +12,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-import com.example.demo.controller.ResponseDto;
-import com.example.demo.entity.VerificationEntity;
+import com.example.demo.entity.dto.ResponseDto;
+import com.example.demo.entity.dto.VerificationEntityDto;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DemoApplicationTests {
@@ -28,19 +28,24 @@ class DemoApplicationTests {
 	@Test
 	void testBackendService() {
 		String verificationId = "AAAA";
+		ResponseEntity<List<VerificationEntityDto>> verifications = restTemplate.exchange(
+				getBaseUrl() + "/retrieving-verifications?verificationId=" + verificationId, HttpMethod.GET, null,
+				new ParameterizedTypeReference<List<VerificationEntityDto>>() {
+				});
+		int numberOfVerification = verifications.getBody().size();
 
 		ResponseEntity<ResponseDto> result = restTemplate.getForEntity(
 				getBaseUrl() + "/backend-service?verificationId=" + verificationId + "&query=W", ResponseDto.class);
 
 		assertThat(result.getStatusCode().is2xxSuccessful()).isTrue();
 
-		ResponseEntity<List<VerificationEntity>> verifications = restTemplate.exchange(
+		verifications = restTemplate.exchange(
 				getBaseUrl() + "/retrieving-verifications?verificationId=" + verificationId, HttpMethod.GET, null,
-				new ParameterizedTypeReference<List<VerificationEntity>>() {
+				new ParameterizedTypeReference<List<VerificationEntityDto>>() {
 				});
 
-		assertThat(verifications.getBody()).hasSize(1);
-		assertThat(verifications.getBody().get(0).getVerificationId()).isEqualTo("AAAA");
+		assertThat(verifications.getBody()).hasSize(numberOfVerification + 1);
+		assertThat(verifications.getBody().getLast().getVerificationId()).isEqualTo("AAAA");
 	}
 
 }

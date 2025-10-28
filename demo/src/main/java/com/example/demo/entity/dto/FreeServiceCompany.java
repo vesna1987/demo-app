@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.demo.entity.dto;
 
 import java.io.Serializable;
 import java.util.Date;

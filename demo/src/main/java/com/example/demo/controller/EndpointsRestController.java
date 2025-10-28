@@ -14,13 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.demo.ServiceCompanyUpdater;
-import com.example.demo.entity.FreeServiceCompany;
-import com.example.demo.entity.PremiumServiceCompany;
-import com.example.demo.entity.ServiceCompanyRepository;
 import com.example.demo.entity.ServiceProvider;
 import com.example.demo.entity.VerificationEntity;
-import com.example.demo.entity.VerificationEntityRepository;
+import com.example.demo.entity.dto.FreeServiceCompany;
+import com.example.demo.entity.dto.PremiumServiceCompany;
+import com.example.demo.entity.dto.ResponseDto;
+import com.example.demo.entity.dto.VerificationEntityDto;
+import com.example.demo.repository.ServiceCompanyRepository;
+import com.example.demo.repository.VerificationEntityRepository;
+import com.example.demo.updater.ServiceCompanyAssembler;
+import com.example.demo.updater.VerificationAssembler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,7 +36,9 @@ public class EndpointsRestController {
 	private ServiceCompanyRepository serviceCompanyRepository;
 
 	@Autowired
-	private ServiceCompanyUpdater serviceCompanyUpdater;
+	private ServiceCompanyAssembler serviceCompanyUpdater;
+	@Autowired
+	private VerificationAssembler verificationAssembler;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -46,8 +51,8 @@ public class EndpointsRestController {
 			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "503 Service Unavailable");
 		}
 
-		return serviceCompanyRepository.findByCinLikeAndFreeTrue("%" + query + "%").stream()
-				.map(sc -> serviceCompanyUpdater.createFreeDto(sc)).toList();
+		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.FREE))
+				.stream().map(sc -> serviceCompanyUpdater.createFreeDto(sc)).toList();
 
 	}
 
@@ -59,8 +64,8 @@ public class EndpointsRestController {
 			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "503 Service Unavailable");
 		}
 
-		return serviceCompanyRepository.findByCinLikeAndPremiumTrue("%" + query + "%").stream()
-				.map(sc -> serviceCompanyUpdater.createPremiumDto(sc)).toList();
+		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.PREMIUM))
+				.stream().map(sc -> serviceCompanyUpdater.createPremiumDto(sc)).toList();
 
 	}
 
@@ -140,9 +145,10 @@ public class EndpointsRestController {
 	}
 
 	@GetMapping(value = "/retrieving-verifications", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<VerificationEntity> retrievingVerifications(
+	public List<VerificationEntityDto> retrievingVerifications(
 			@RequestParam(name = "verificationId") String verificationId) throws Exception {
-		return verificationEntityRepository.findByVerificationId(verificationId);
+		return verificationAssembler
+				.createDtos(verificationEntityRepository.findByVerificationIdOrderByIdAsc(verificationId));
 
 	}
 

@@ -3,7 +3,12 @@ package com.example.demo.entity.dto;
 import java.io.Serializable;
 import java.util.List;
 
-public class ResponseDto {
+import com.example.demo.entity.ServiceProvider;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class ResponseDto implements DataTransferObject {
+
+	private static final long serialVersionUID = 1L;
 
 	private String verificationId;
 
@@ -12,6 +17,9 @@ public class ResponseDto {
 	private Serializable result;
 
 	private List<Serializable> otherResults;
+
+	@JsonIgnore
+	private ServiceProvider source;
 
 	public String getVerificationId() {
 		return verificationId;
@@ -43,6 +51,14 @@ public class ResponseDto {
 
 	public void setOtherResults(List<Serializable> otherResults) {
 		this.otherResults = otherResults;
+	}
+
+	public ServiceProvider getSource() {
+		return source;
+	}
+
+	public void setSource(ServiceProvider source) {
+		this.source = source;
 	}
 
 }

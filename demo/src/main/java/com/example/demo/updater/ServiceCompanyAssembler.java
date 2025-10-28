@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.entity.ServiceCompany;
 import com.example.demo.entity.ServiceProvider;
-import com.example.demo.entity.dto.FreeServiceCompany;
-import com.example.demo.entity.dto.PremiumServiceCompany;
+import com.example.demo.entity.dto.ServiceCompanyDto;
 
 @Component
 public class ServiceCompanyAssembler {
@@ -14,41 +13,44 @@ public class ServiceCompanyAssembler {
 		return new ServiceCompany();
 	}
 
-	public void updateFromFreeServiceCompany(ServiceCompany entity, FreeServiceCompany dto) {
-		entity.setCin(dto.getCin());
-		entity.setActive(dto.isActive());
-		entity.setAddress(dto.getAddress());
+	public void updateFromFreeServiceCompany(ServiceCompany entity, ServiceCompanyDto dto) {
+		commonUpdate(entity, dto);
 		entity.addProvider(ServiceProvider.FREE);
+		entity.setAddress(dto.getAddress());
+	}
+
+	public void updateFromPremiumServiceCompany(ServiceCompany entity, ServiceCompanyDto dto) {
+		commonUpdate(entity, dto);
+		entity.addProvider(ServiceProvider.PREMIUM);
+		entity.setFullAddress(dto.getFullAddress());
+	}
+
+	private void commonUpdate(ServiceCompany entity, ServiceCompanyDto dto) {
+		entity.setCin(dto.getCin());
+		entity.setActive(dto.getIsActive());
+
 		entity.setName(dto.getName());
 		entity.setRegistrationDate(dto.getRegistrationDate());
 	}
 
-	public void updateFromPremiumServiceCompany(ServiceCompany entity, PremiumServiceCompany dto) {
-		entity.setFullAddress(dto.getFullAddress());
-		entity.addProvider(ServiceProvider.PREMIUM);
-		entity.setCin(dto.getCompanyIdentificationNumber());
-		entity.setActive(dto.isActive());
-		entity.setName(dto.getCompanyName());
-		entity.setRegistrationDate(dto.getRegistrationDate());
-	}
-
-	public FreeServiceCompany createFreeDto(ServiceCompany entity) {
-		FreeServiceCompany dto = new FreeServiceCompany();
-		dto.setCin(entity.getCin());
-		dto.setActive(entity.isActive());
+	public ServiceCompanyDto createFreeDto(ServiceCompany entity) {
+		ServiceCompanyDto dto = new ServiceCompanyDto();
+		commonAssemble(entity, dto);
 		dto.setAddress(entity.getAddress());
-		dto.setName(entity.getName());
-		dto.setRegistrationDate(entity.getRegistrationDate());
 		return dto;
 	}
 
-	public PremiumServiceCompany createPremiumDto(ServiceCompany entity) {
-		PremiumServiceCompany dto = new PremiumServiceCompany();
-		dto.setCompanyIdentificationNumber(entity.getCin());
-		dto.setActive(entity.isActive());
-		dto.setFullAddress(entity.getFullAddress());
-		dto.setCompanyName(entity.getName());
+	private void commonAssemble(ServiceCompany entity, ServiceCompanyDto dto) {
+		dto.setCin(entity.getCin());
+		dto.setIsActive(entity.isActive());
+		dto.setName(entity.getName());
 		dto.setRegistrationDate(entity.getRegistrationDate());
+	}
+
+	public ServiceCompanyDto createPremiumDto(ServiceCompany entity) {
+		ServiceCompanyDto dto = new ServiceCompanyDto();
+		commonAssemble(entity, dto);
+		dto.setFullAddress(entity.getFullAddress());
 		return dto;
 	}
 

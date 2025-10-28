@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.entity.ServiceCompany;
-import com.example.demo.entity.dto.FreeServiceCompany;
-import com.example.demo.entity.dto.PremiumServiceCompany;
+import com.example.demo.entity.dto.ServiceCompanyDto;
 import com.example.demo.repository.ServiceCompanyRepository;
 import com.example.demo.updater.ServiceCompanyAssembler;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,19 +23,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DemoApplicationReadyListener implements ApplicationListener<ApplicationReadyEvent> {
 
 	@Autowired
-	private ObjectMapper objectMapper;
-	@Autowired
 	private ServiceCompanyAssembler serviceCompanyUpdater;
 	@Autowired
 	private ServiceCompanyRepository serviceCompanyRepository;
+	@Autowired
+	@Qualifier("snakeCaseObjectMapper")
+	private ObjectMapper snakeCaseObjectMapper;
+	@Autowired
+	@Qualifier("camelCaseObjectMapper")
+	private ObjectMapper camelCaseObjectMapper;
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		try {
 
 			InputStream inputStreamForFC = getClass().getResourceAsStream("/free_service_companies-1.json");
-			List<FreeServiceCompany> freeCompanies = objectMapper.readValue(inputStreamForFC,
-					new TypeReference<List<FreeServiceCompany>>() {
+			List<ServiceCompanyDto> freeCompanies = snakeCaseObjectMapper.readValue(inputStreamForFC,
+					new TypeReference<List<ServiceCompanyDto>>() {
 					});
 
 			Map<String, ServiceCompany> existingCompanies = new HashMap<>();
@@ -48,15 +52,14 @@ public class DemoApplicationReadyListener implements ApplicationListener<Applica
 			}).toList());
 
 			InputStream inputStreamForPC = getClass().getResourceAsStream("/premium_service_companies-1.json");
-			List<PremiumServiceCompany> premiumCompanies = objectMapper.readValue(inputStreamForPC,
-					new TypeReference<List<PremiumServiceCompany>>() {
+			List<ServiceCompanyDto> premiumCompanies = camelCaseObjectMapper.readValue(inputStreamForPC,
+					new TypeReference<List<ServiceCompanyDto>>() {
 					});
 
 			serviceCompanies.addAll(premiumCompanies.stream().map(dto -> {
-				ServiceCompany sc = existingCompanies.getOrDefault(dto.getCompanyIdentificationNumber(),
-						new ServiceCompany());
+				ServiceCompany sc = existingCompanies.getOrDefault(dto.getCin(), new ServiceCompany());
 				serviceCompanyUpdater.updateFromPremiumServiceCompany(sc, dto);
-				existingCompanies.put(dto.getCompanyIdentificationNumber(), sc);
+				existingCompanies.put(dto.getCin(), sc);
 				return sc;
 			}).toList());
 

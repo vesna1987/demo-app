@@ -6,9 +6,9 @@ import com.example.demo.entity.ServiceProvider;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Lob;
+public class VerificationEntityDto implements DataTransferObject {
 
-public class VerificationEntityDto {
+	private static final long serialVersionUID = 1L;
 
 	@JsonIgnore
 	private Long id;
@@ -17,7 +17,6 @@ public class VerificationEntityDto {
 	private String queryText;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = JsonFormat.DEFAULT_TIMEZONE)
 	private Date timestamp;
-	@Lob
 	private String result;
 	private ServiceProvider source;
 

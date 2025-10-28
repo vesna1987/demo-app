@@ -1,23 +1,22 @@
 package com.example.demo.entity.dto;
 
-import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FreeServiceCompany implements Serializable {
+@JsonFilter("myFilter")
+public class ServiceCompanyDto implements DataTransferObject {
 
 	private static final long serialVersionUID = 1L;
 
 	private String cin;
 	private String name;
-	@JsonProperty("registration_date")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date registrationDate;
 	private String address;
-	@JsonProperty("is_active")
-	private boolean active;
+	private boolean isActive;
+	private String fullAddress;
 
 	public String getCin() {
 		return cin;
@@ -51,12 +50,20 @@ public class FreeServiceCompany implements Serializable {
 		this.address = address;
 	}
 
-	public boolean isActive() {
-		return active;
+	public boolean getIsActive() {
+		return isActive;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public String getFullAddress() {
+		return fullAddress;
+	}
+
+	public void setFullAddress(String fullAddress) {
+		this.fullAddress = fullAddress;
 	}
 
 }

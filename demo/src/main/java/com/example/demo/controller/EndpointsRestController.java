@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +16,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.entity.ServiceProvider;
 import com.example.demo.entity.VerificationEntity;
-import com.example.demo.entity.dto.FreeServiceCompany;
-import com.example.demo.entity.dto.PremiumServiceCompany;
 import com.example.demo.entity.dto.ResponseDto;
-import com.example.demo.entity.dto.VerificationEntityDto;
-import com.example.demo.repository.ServiceCompanyRepository;
+import com.example.demo.entity.dto.ServiceCompanyDto;
+import com.example.demo.exception.NotFoundFreeCompanyException;
 import com.example.demo.repository.VerificationEntityRepository;
-import com.example.demo.updater.ServiceCompanyAssembler;
-import com.example.demo.updater.VerificationAssembler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,40 +28,26 @@ public class EndpointsRestController {
 
 	@Autowired
 	private VerificationEntityRepository verificationEntityRepository;
-	@Autowired
-	private ServiceCompanyRepository serviceCompanyRepository;
 
 	@Autowired
-	private ServiceCompanyAssembler serviceCompanyUpdater;
+	@Qualifier("snakeCaseObjectMapper")
+	private ObjectMapper snakeCaseObjectMapper;
 	@Autowired
-	private VerificationAssembler verificationAssembler;
+	@Qualifier("camelCaseObjectMapper")
+	private ObjectMapper camelCaseObjectMapper;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	private CompanyRetriever companyRetriever;
 
 	@GetMapping(value = "/free-third-party", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<FreeServiceCompany> freeThirdParty(@RequestParam(name = "query") String query) throws Exception {
-		Random random = new Random();
-		int randomNumber = random.nextInt(100) + 1;
-		if (randomNumber <= 40) {
-			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "503 Service Unavailable");
-		}
-
-		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.FREE))
-				.stream().map(sc -> serviceCompanyUpdater.createFreeDto(sc)).toList();
+	public List<ServiceCompanyDto> freeThirdParty(@RequestParam(name = "query") String query) throws Exception {
+		return companyRetriever.getFreeCompanies(query);
 
 	}
 
 	@GetMapping(value = "/premium-third-party", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<PremiumServiceCompany> premiumThirdParty(@RequestParam(name = "query") String query) throws Exception {
-		Random random = new Random();
-		int randomNumber = random.nextInt(100) + 1;
-		if (randomNumber <= 10) {
-			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "503 Service Unavailable");
-		}
-
-		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.PREMIUM))
-				.stream().map(sc -> serviceCompanyUpdater.createPremiumDto(sc)).toList();
+	public List<ServiceCompanyDto> premiumThirdParty(@RequestParam(name = "query") String query) throws Exception {
+		return companyRetriever.getPremiumCompanies(query);
 
 	}
 
@@ -104,9 +86,11 @@ public class EndpointsRestController {
 
 	private void tryPremium(String query, ResponseDto response, VerificationEntity verification)
 			throws Exception, JsonProcessingException {
-		List<PremiumServiceCompany> result = premiumThirdParty(query).stream().filter(i -> i.isActive()).toList();
-		verification.setResult(objectMapper.writeValueAsString(result));
+		List<ServiceCompanyDto> result = premiumThirdParty(query).stream().filter(i -> i.getIsActive()).toList();
+		verification.setResult(camelCaseObjectMapper.writeValueAsString(result));
 		verification.setSource(ServiceProvider.PREMIUM);
+		response.setSource(ServiceProvider.PREMIUM);
+
 		List<Serializable> castedResults = result.stream().map(i -> (Serializable) i).toList();
 		int sizeOfResult = result.size();
 		if (sizeOfResult == 1) {
@@ -130,9 +114,10 @@ public class EndpointsRestController {
 
 	private void tryFree(String query, ResponseDto response, VerificationEntity verification)
 			throws Exception, JsonProcessingException {
-		List<FreeServiceCompany> result = freeThirdParty(query).stream().filter(i -> i.isActive()).toList();
-		verification.setResult(objectMapper.writeValueAsString(result));
+		List<ServiceCompanyDto> result = freeThirdParty(query).stream().filter(i -> i.getIsActive()).toList();
+		verification.setResult(snakeCaseObjectMapper.writeValueAsString(result));
 		verification.setSource(ServiceProvider.FREE);
+		response.setSource(ServiceProvider.FREE);
 		List<Serializable> castedResults = result.stream().map(i -> (Serializable) i).toList();
 		int sizeOfResult = result.size();
 		if (sizeOfResult == 1) {
@@ -142,14 +127,6 @@ public class EndpointsRestController {
 		} else {
 			throw new NotFoundFreeCompanyException();
 		}
-	}
-
-	@GetMapping(value = "/retrieving-verifications", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<VerificationEntityDto> retrievingVerifications(
-			@RequestParam(name = "verificationId") String verificationId) throws Exception {
-		return verificationAssembler
-				.createDtos(verificationEntityRepository.findByVerificationIdOrderByIdAsc(verificationId));
-
 	}
 
 	private void noResultsFound(ResponseDto response, VerificationEntity verification) {

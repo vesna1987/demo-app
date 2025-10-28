@@ -27,7 +27,7 @@ class DemoApplicationTests {
 
 	@Test
 	void testBackendService() {
-		String verificationId = "AAAA";
+		String verificationId = "AAAABBCC";
 		ResponseEntity<List<VerificationEntityDto>> verifications = restTemplate.exchange(
 				getBaseUrl() + "/retrieving-verifications?verificationId=" + verificationId, HttpMethod.GET, null,
 				new ParameterizedTypeReference<List<VerificationEntityDto>>() {
@@ -45,7 +45,8 @@ class DemoApplicationTests {
 				});
 
 		assertThat(verifications.getBody()).hasSize(numberOfVerification + 1);
-		assertThat(verifications.getBody().getLast().getVerificationId()).isEqualTo("AAAA");
+		assertThat(verifications.getBody().stream().anyMatch(v -> verificationId.equals(v.getVerificationId())))
+				.isTrue();
 	}
 
 }

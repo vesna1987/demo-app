@@ -21,8 +21,8 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
-	@Bean
-	public ObjectMapper objectMapper() {
+	@Bean("defaultObjectMapper")
+	public ObjectMapper defaultObjectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setTimeZone(TimeZone.getDefault());
 		return objectMapper;

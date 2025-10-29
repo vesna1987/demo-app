@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo.assembler.ServiceCompanyAssembler;
 import com.example.demo.entity.ServiceProvider;
 import com.example.demo.entity.dto.ServiceCompanyDto;
 import com.example.demo.repository.ServiceCompanyRepository;
-import com.example.demo.updater.ServiceCompanyAssembler;
 
 @Component
 public class CompanyRetriever {
@@ -20,7 +20,7 @@ public class CompanyRetriever {
 	private ServiceCompanyRepository serviceCompanyRepository;
 
 	@Autowired
-	private ServiceCompanyAssembler serviceCompanyUpdater;
+	private ServiceCompanyAssembler serviceCompanyAssembler;
 
 	public List<ServiceCompanyDto> getFreeCompanies(String query) {
 		Random random = new Random();
@@ -30,7 +30,7 @@ public class CompanyRetriever {
 		}
 
 		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.FREE))
-				.stream().map(sc -> serviceCompanyUpdater.createFreeDto(sc)).toList();
+				.stream().map(sc -> serviceCompanyAssembler.createFreeDto(sc)).toList();
 	}
 
 	public List<ServiceCompanyDto> getPremiumCompanies(String query) {
@@ -41,7 +41,7 @@ public class CompanyRetriever {
 		}
 
 		return serviceCompanyRepository.findByCinLikeAndProvidersIn("%" + query + "%", List.of(ServiceProvider.PREMIUM))
-				.stream().map(sc -> serviceCompanyUpdater.createPremiumDto(sc)).toList();
+				.stream().map(sc -> serviceCompanyAssembler.createPremiumDto(sc)).toList();
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.example.demo.updater;
+package com.example.demo.assembler;
 
 import org.springframework.stereotype.Component;
 

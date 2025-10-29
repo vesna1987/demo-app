@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -90,24 +89,23 @@ public class EndpointsRestController {
 		verification.setResult(camelCaseObjectMapper.writeValueAsString(result));
 		verification.setSource(ServiceProvider.PREMIUM);
 		response.setSource(ServiceProvider.PREMIUM);
-
-		List<Serializable> castedResults = result.stream().map(i -> (Serializable) i).toList();
+		;
 		int sizeOfResult = result.size();
 		if (sizeOfResult == 1) {
-			extractSingleResult(response, castedResults);
+			extractSingleResult(response, result);
 		} else if (sizeOfResult > 1) {
-			extractMultipleResults(response, castedResults);
+			extractMultipleResults(response, result);
 		} else {
 			noResultsFound(response, verification);
 		}
 	}
 
-	private void extractMultipleResults(ResponseDto response, List<Serializable> result) {
+	private void extractMultipleResults(ResponseDto response, List<ServiceCompanyDto> result) {
 		response.setResult(result.get(0));
-		response.setOtherResults(result.subList(1, result.size()).stream().map(i -> (Serializable) i).toList());
+		response.setOtherResults(result.subList(1, result.size()));
 	}
 
-	private void extractSingleResult(ResponseDto response, List<Serializable> result) {
+	private void extractSingleResult(ResponseDto response, List<ServiceCompanyDto> result) {
 		response.setResult(result.get(0));
 		response.setOtherResults(Collections.emptyList());
 	}
@@ -118,12 +116,11 @@ public class EndpointsRestController {
 		verification.setResult(snakeCaseObjectMapper.writeValueAsString(result));
 		verification.setSource(ServiceProvider.FREE);
 		response.setSource(ServiceProvider.FREE);
-		List<Serializable> castedResults = result.stream().map(i -> (Serializable) i).toList();
 		int sizeOfResult = result.size();
 		if (sizeOfResult == 1) {
-			extractSingleResult(response, castedResults);
+			extractSingleResult(response, result);
 		} else if (sizeOfResult > 1) {
-			extractMultipleResults(response, castedResults);
+			extractMultipleResults(response, result);
 		} else {
 			throw new NotFoundFreeCompanyException();
 		}

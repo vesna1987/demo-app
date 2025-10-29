@@ -16,7 +16,7 @@ public class ResponseDto implements DataTransferObject {
 
 	private Serializable result;
 
-	private List<Serializable> otherResults;
+	private List<ServiceCompanyDto> otherResults;
 
 	@JsonIgnore
 	private ServiceProvider source;
@@ -45,11 +45,11 @@ public class ResponseDto implements DataTransferObject {
 		this.result = result;
 	}
 
-	public List<Serializable> getOtherResults() {
+	public List<ServiceCompanyDto> getOtherResults() {
 		return otherResults;
 	}
 
-	public void setOtherResults(List<Serializable> otherResults) {
+	public void setOtherResults(List<ServiceCompanyDto> otherResults) {
 		this.otherResults = otherResults;
 	}
 

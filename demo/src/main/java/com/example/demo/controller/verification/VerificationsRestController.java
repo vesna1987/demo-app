@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.assembler.VerificationAssembler;
 import com.example.demo.entity.dto.VerificationEntityDto;
 import com.example.demo.repository.VerificationEntityRepository;
-import com.example.demo.updater.VerificationAssembler;
 
 @RestController
 public class VerificationsRestController {

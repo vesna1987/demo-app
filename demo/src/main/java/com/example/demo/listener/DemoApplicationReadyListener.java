@@ -12,10 +12,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.assembler.ServiceCompanyAssembler;
 import com.example.demo.entity.ServiceCompany;
 import com.example.demo.entity.dto.ServiceCompanyDto;
 import com.example.demo.repository.ServiceCompanyRepository;
-import com.example.demo.updater.ServiceCompanyAssembler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
